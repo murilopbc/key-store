@@ -5,6 +5,10 @@ export interface UserProfile {
   storeName: string;
   photoUri: string | null;
   biometricEnabled: number; // 0 ou 1
+  cnpj: string; // só dígitos ('' se não informado)
+  legalName: string; // razão social
+  address: string;
+  phone: string; // só dígitos
 }
 
 export interface SaveProfileInput {
@@ -12,4 +16,8 @@ export interface SaveProfileInput {
   email: string;
   storeName: string;
   photoUri: string | null;
+  cnpj: string;
+  legalName: string;
+  address: string;
+  phone: string;
 }
