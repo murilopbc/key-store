@@ -15,6 +15,9 @@ import { useDemoData } from '../src/hooks/useDemoData';
 import { FormField } from '../src/components/FormField';
 import { Button } from '../src/components/Button';
 import { CameraCapture } from '../src/components/CameraCapture';
+import { useCnpjLookup } from '../src/hooks/useCnpjLookup';
+import { formatCnpj, onlyDigits } from '../src/utils/cnpj';
+import { formatPhone } from '../src/utils/format';
 import { savePhotoPermanently, deletePhoto } from '../src/services/fileService';
 import {
   requestNotificationPermission,
@@ -32,9 +35,14 @@ export default function Profile() {
   const { biometricEnabled, enableBiometric, disableBiometric, lock } = useSecurityContext();
   const { profile, save } = useProfile();
   const { loadDemoProducts } = useDemoData();
+  const cnpjLookup = useCnpjLookup();
 
   const [name, setName] = useState('');
   const [storeName, setStoreName] = useState('');
+  const [cnpj, setCnpj] = useState('');
+  const [legalName, setLegalName] = useState('');
+  const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -46,8 +54,34 @@ export default function Profile() {
       setName(profile.name);
       setStoreName(profile.storeName);
       setPhotoUri(profile.photoUri);
+      setCnpj(formatCnpj(profile.cnpj ?? ''));
+      setLegalName(profile.legalName ?? '');
+      setAddress(profile.address ?? '');
+      setPhone(formatPhone(profile.phone ?? ''));
     }
   }, [profile]);
+
+  function handleCnpjChange(text: string) {
+    setCnpj(formatCnpj(text));
+    cnpjLookup.clearError();
+  }
+
+  async function handleLookupCnpj() {
+    const company = await cnpjLookup.lookup(cnpj);
+    if (!company) return; // o erro aparece embaixo do campo
+    setStoreName(company.tradeName || company.legalName);
+    setLegalName(company.legalName);
+    setAddress(company.address);
+    if (company.phone) setPhone(formatPhone(company.phone));
+
+    const inactive = company.status && company.status !== 'ATIVA';
+    Alert.alert(
+      inactive ? 'Atenção: CNPJ não está ativo' : 'Dados encontrados',
+      inactive
+        ? `Situação na Receita: ${company.status}. Os dados foram preenchidos mesmo assim; confira antes de salvar.`
+        : 'Confira os campos preenchidos e toque em "Salvar perfil".',
+    );
+  }
 
   function handleCapture(tempUri: string) {
     // foto ainda não salva no banco: descarta a anterior não persistida
@@ -59,7 +93,16 @@ export default function Profile() {
   async function handleSave() {
     try {
       setSaving(true);
-      await save({ name: name.trim(), email: user?.email ?? '', storeName: storeName.trim(), photoUri });
+      await save({
+        name: name.trim(),
+        email: user?.email ?? '',
+        storeName: storeName.trim(),
+        photoUri,
+        cnpj: onlyDigits(cnpj),
+        legalName: legalName.trim(),
+        address: address.trim(),
+        phone: onlyDigits(phone),
+      });
       Alert.alert('Pronto', 'Perfil salvo.');
     } catch {
       Alert.alert('Erro', 'Não foi possível salvar o perfil.');
@@ -137,8 +180,37 @@ export default function Profile() {
 
       <Text className="text-xs uppercase tracking-wider text-stone-500 mb-2">Dados do vendedor</Text>
       <FormField label="Nome" value={name} onChangeText={setName} />
-      <FormField label="Nome da loja" value={storeName} onChangeText={setStoreName} />
       <FormField label="Email (conta)" value={user?.email ?? ''} editable={false} />
+
+      <Text className="text-xs uppercase tracking-wider text-stone-500 mt-4 mb-2">Dados da loja</Text>
+      <FormField
+        label="CNPJ"
+        value={cnpj}
+        onChangeText={handleCnpjChange}
+        keyboardType="number-pad"
+        placeholder="00.000.000/0000-00"
+        maxLength={18}
+        error={cnpjLookup.error ?? undefined}
+      />
+      <View className="mb-4">
+        <Button
+          title="Buscar dados pelo CNPJ (BrasilAPI)"
+          variant="secondary"
+          onPress={handleLookupCnpj}
+          loading={cnpjLookup.loading}
+        />
+      </View>
+      <FormField label="Nome da loja" value={storeName} onChangeText={setStoreName} />
+      <FormField label="Razão social" value={legalName} onChangeText={setLegalName} />
+      <FormField label="Endereço" value={address} onChangeText={setAddress} multiline />
+      <FormField
+        label="Telefone"
+        value={phone}
+        onChangeText={(t) => setPhone(formatPhone(t))}
+        keyboardType="phone-pad"
+        placeholder="(00) 00000-0000"
+        maxLength={15}
+      />
       <Button title="Salvar perfil" onPress={handleSave} loading={saving} />
 
       <Text className="text-xs uppercase tracking-wider text-stone-500 mt-8 mb-2">Segurança</Text>

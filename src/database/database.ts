@@ -65,7 +65,34 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       email            TEXT    NOT NULL DEFAULT '',
       storeName        TEXT    NOT NULL DEFAULT '',
       photoUri         TEXT,
-      biometricEnabled INTEGER NOT NULL DEFAULT 0
+      biometricEnabled INTEGER NOT NULL DEFAULT 0,
+      cnpj             TEXT    NOT NULL DEFAULT '',
+      legalName        TEXT    NOT NULL DEFAULT '',
+      address          TEXT    NOT NULL DEFAULT '',
+      phone            TEXT    NOT NULL DEFAULT ''
     );
   `);
+
+  // Bancos criados antes da consulta de CNPJ não têm as colunas novas:
+  // o CREATE TABLE IF NOT EXISTS não altera tabela existente, então adicionamos aqui.
+  await addMissingColumns(db, 'profile', {
+    cnpj: "TEXT NOT NULL DEFAULT ''",
+    legalName: "TEXT NOT NULL DEFAULT ''",
+    address: "TEXT NOT NULL DEFAULT ''",
+    phone: "TEXT NOT NULL DEFAULT ''",
+  });
+}
+
+async function addMissingColumns(
+  db: SQLite.SQLiteDatabase,
+  table: string,
+  columns: Record<string, string>,
+): Promise<void> {
+  const existing = await db.getAllAsync<{ name: string }>(`PRAGMA table_info(${table})`);
+  const names = new Set(existing.map((c) => c.name));
+  for (const [column, definition] of Object.entries(columns)) {
+    if (!names.has(column)) {
+      await db.execAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    }
+  }
 }

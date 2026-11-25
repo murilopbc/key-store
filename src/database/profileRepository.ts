@@ -13,20 +13,32 @@ export async function saveProfile(input: SaveProfileInput): Promise<void> {
 
   if (existing) {
     await db.runAsync(
-      'UPDATE profile SET name = ?, email = ?, storeName = ?, photoUri = ? WHERE id = 1',
+      `UPDATE profile
+       SET name = ?, email = ?, storeName = ?, photoUri = ?,
+           cnpj = ?, legalName = ?, address = ?, phone = ?
+       WHERE id = 1`,
       input.name,
       input.email,
       input.storeName,
       input.photoUri,
+      input.cnpj,
+      input.legalName,
+      input.address,
+      input.phone,
     );
   } else {
     await db.runAsync(
-      `INSERT INTO profile (id, name, email, storeName, photoUri, biometricEnabled)
-       VALUES (1, ?, ?, ?, ?, 0)`,
+      `INSERT INTO profile
+         (id, name, email, storeName, photoUri, biometricEnabled, cnpj, legalName, address, phone)
+       VALUES (1, ?, ?, ?, ?, 0, ?, ?, ?, ?)`,
       input.name,
       input.email,
       input.storeName,
       input.photoUri,
+      input.cnpj,
+      input.legalName,
+      input.address,
+      input.phone,
     );
   }
 }

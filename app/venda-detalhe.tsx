@@ -25,7 +25,7 @@ export default function VendaDetalhe() {
   const current = sale;
 
   async function handleShare() {
-    await Share.share({ message: buildReceipt(current, profile?.storeName ?? '') });
+    await Share.share({ message: buildReceipt(current, profile) });
   }
 
   function handleCancel() {

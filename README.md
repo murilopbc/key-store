@@ -59,7 +59,24 @@ Use **aparelho físico**: câmera, biometria e notificações não funcionam dir
 | `historico.tsx` | 2.6 Vendas por período | — |
 | `relatorios.tsx` | 2.7 Por dia/semana/mês, mais vendidos, lucro, gráfico | — |
 | `notificacoes.tsx` | 2.8 Lista de alertas | **Notificações** |
-| `profile.tsx` | 2.9 Dados, foto, biometria, trocar senha | Câmera frontal, Biometria |
+| `profile.tsx` | 2.9 Dados, foto, biometria, trocar senha · dados da loja pelo CNPJ | Câmera frontal, Biometria, **API externa** |
+
+### Integração com API externa: BrasilAPI (consulta de CNPJ)
+
+No **Perfil → Dados da loja**, o vendedor digita o CNPJ e toca em **Buscar dados pelo CNPJ**. O app consulta
+`GET https://brasilapi.com.br/api/cnpj/v1/{cnpj}` (gratuita, sem chave) e preenche nome da loja, razão social,
+endereço e telefone. Esses dados saem no cabeçalho do **recibo** compartilhado.
+
+| Camada | Arquivo | Papel |
+|---|---|---|
+| Serviço | `src/services/brasilApi.ts` | Chamada HTTP, tempo limite de 10 s, tradução da resposta e dos erros (404, 400, 429, sem internet) |
+| Hook | `src/hooks/useCnpjLookup.ts` | Valida o CNPJ antes de chamar a API; controla `loading` e `error` |
+| Utilitário | `src/utils/cnpj.ts` | Limpar, validar dígitos verificadores e aplicar máscara |
+| Banco | `src/database/database.ts` | Colunas `cnpj`, `legalName`, `address`, `phone` em `profile` (com `ALTER TABLE` para bancos antigos) |
+
+- **Offline continua funcionando:** sem internet, aparece o aviso e os campos podem ser preenchidos à mão.
+- **CNPJ inativo** (baixado, inapto...): os dados são preenchidos, mas o app avisa a situação na Receita.
+- **User-Agent próprio:** a BrasilAPI fica atrás do Cloudflare, que recusa alguns User-Agents genéricos; o app se identifica como `LojaDeChaves/1.0`.
 
 ### Decisões que valem na defesa
 - **Baixa de estoque transacional:** `createSale` grava venda, itens e baixa dentro de **uma transação**; se faltar estoque em qualquer item, nada é gravado (`UPDATE ... WHERE quantity >= ?`).

@@ -26,6 +26,15 @@ export function moneyToInput(value: number): string {
   return value.toFixed(2).replace('.', ',');
 }
 
+/** Telefone com DDD: 1133334444 → (11) 3333-4444; 11933334444 → (11) 93333-4444. */
+export function formatPhone(value: string): string {
+  const d = value.replace(/\D/g, '').slice(0, 11);
+  if (d.length <= 2) return d.length ? `(${d}` : '';
+  const split = d.length === 11 ? 7 : 6;
+  if (d.length <= split) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, split)}-${d.slice(split)}`;
+}
+
 export const PAYMENT_LABELS: Record<string, string> = {
   dinheiro: 'Dinheiro',
   pix: 'Pix',
