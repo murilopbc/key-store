@@ -1,6 +1,8 @@
 import { useRef } from 'react';
 import { View, Text, TouchableOpacity, Linking } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { Icon } from './Icon';
+import { colors } from '../theme';
 
 interface BarcodeScannerProps {
   onScan: (code: string) => void;
@@ -27,7 +29,9 @@ export function BarcodeScanner({
   if (!permission.granted) {
     return (
       <View className="flex-1 items-center justify-center bg-black p-8">
-        <Text className="text-6xl mb-4">📷</Text>
+        <View className="mb-4">
+          <Icon name="barcode-outline" size={64} color={colors.white} />
+        </View>
         <Text className="text-white text-center mb-6">
           Precisamos da câmera para ler códigos de barras e QR Codes.
         </Text>

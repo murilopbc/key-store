@@ -16,6 +16,8 @@ import { FormField } from '../src/components/FormField';
 import { Button } from '../src/components/Button';
 import { CameraCapture } from '../src/components/CameraCapture';
 import { BarcodeScanner } from '../src/components/BarcodeScanner';
+import { IconButton } from '../src/components/IconButton';
+import { Icon } from '../src/components/Icon';
 import { savePhotoPermanently, deletePhoto } from '../src/services/fileService';
 import { parseMoney, parseInteger, moneyToInput } from '../src/utils/format';
 import { colors } from '../src/theme';
@@ -175,13 +177,16 @@ export default function ProdutoForm() {
           {form.photoUri ? (
             <Image source={{ uri: form.photoUri }} className="w-40 h-40 rounded-2xl" />
           ) : (
-            <View className="w-40 h-40 rounded-2xl bg-stone-200 items-center justify-center">
-              <Text className="text-5xl">📷</Text>
+            <View className="w-40 h-40 rounded-2xl bg-white border-2 border-dashed border-stone-300 items-center justify-center">
+              <Icon name="camera-outline" size={44} color={colors.placeholder} />
             </View>
           )}
-          <Text className="text-amber-700 font-bold mt-2">
-            {form.photoUri ? 'Trocar foto' : 'Fotografar produto'}
-          </Text>
+          <View className="flex-row items-center gap-1 mt-2">
+            <Icon name="camera" size={16} color={colors.primary} />
+            <Text className="text-amber-700 font-bold">
+              {form.photoUri ? 'Trocar foto' : 'Fotografar produto'}
+            </Text>
+          </View>
         </TouchableOpacity>
 
         <FormField
@@ -197,15 +202,20 @@ export default function ProdutoForm() {
           onChangeText={(v) => update('category', v)}
         />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="grow-0 -mt-2 mb-4" contentContainerClassName="gap-2">
-          {SUGGESTED_CATEGORIES.map((c) => (
-            <TouchableOpacity
-              key={c}
-              className="px-3 py-1 rounded-full bg-stone-200"
-              onPress={() => update('category', c)}
-            >
-              <Text className="text-xs text-stone-700">{c}</Text>
-            </TouchableOpacity>
-          ))}
+          {SUGGESTED_CATEGORIES.map((c) => {
+            const active = form.category === c;
+            return (
+              <TouchableOpacity
+                key={c}
+                className={`px-3 py-1.5 rounded-full border ${
+                  active ? 'bg-amber-100 border-amber-600' : 'bg-white border-stone-200'
+                }`}
+                onPress={() => update('category', c)}
+              >
+                <Text className={`text-xs ${active ? 'text-amber-800 font-bold' : 'text-stone-700'}`}>{c}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
 
         <FormField
@@ -223,12 +233,9 @@ export default function ProdutoForm() {
               onChangeText={(v) => update('barcode', v)}
             />
           </View>
-          <TouchableOpacity
-            className="bg-slate-800 rounded-lg px-4 h-12 mb-4 items-center justify-center"
-            onPress={() => setMode('scanner')}
-          >
-            <Text className="text-xl">📷</Text>
-          </TouchableOpacity>
+          <View className="mb-4">
+            <IconButton icon="barcode-outline" accessibilityLabel="Escanear código de barras" onPress={() => setMode('scanner')} />
+          </View>
         </View>
 
         <View className="flex-row gap-3">
@@ -275,7 +282,12 @@ export default function ProdutoForm() {
           </View>
         </View>
 
-        <Button title={isEditing ? 'Salvar alterações' : 'Cadastrar produto'} onPress={handleSave} loading={saving} />
+        <Button
+          title={isEditing ? 'Salvar alterações' : 'Cadastrar produto'}
+          icon="checkmark-circle-outline"
+          onPress={handleSave}
+          loading={saving}
+        />
       </ScrollView>
     </KeyboardAvoidingView>
   );

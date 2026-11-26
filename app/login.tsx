@@ -13,6 +13,8 @@ import { useAuthContext } from '../src/contexts/AuthContext';
 import { useSecurityContext } from '../src/contexts/SecurityContext';
 import { FormField } from '../src/components/FormField';
 import { Button } from '../src/components/Button';
+import { Icon } from '../src/components/Icon';
+import { colors } from '../src/theme';
 
 export default function Login() {
   const router = useRouter();
@@ -62,13 +64,15 @@ export default function Login() {
         contentContainerClassName="flex-grow justify-center p-6"
         keyboardShouldPersistTaps="handled"
       >
-        <Text className="text-6xl text-center mb-2">🔑</Text>
-        <Text className="text-3xl font-bold text-amber-500 text-center">
+        <View className="self-center w-20 h-20 rounded-3xl bg-amber-700 items-center justify-center mb-4 shadow-lg">
+          <Icon name="key" size={40} color={colors.white} />
+        </View>
+        <Text className="text-3xl font-bold text-white text-center">
           Loja de Chaves
         </Text>
         <Text className="text-stone-400 text-center mb-8">Acesso do vendedor</Text>
 
-        <View className="bg-stone-50 rounded-2xl p-5">
+        <View className="bg-white rounded-3xl p-5 shadow-lg">
           <FormField
             label="Email"
             placeholder="vendedor@loja.com"
@@ -86,13 +90,15 @@ export default function Login() {
           />
           <Button title="Entrar" onPress={handleLogin} loading={loading} />
 
-          <TouchableOpacity className="mt-4" onPress={handleForgot}>
-            <Text className="text-stone-500 text-center">Esqueci minha senha</Text>
+          <TouchableOpacity className="mt-4 p-1" onPress={handleForgot}>
+            <Text className="text-amber-700 text-center font-semibold">Esqueci minha senha</Text>
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity className="mt-6" onPress={() => router.push('/register')}>
-          <Text className="text-amber-500 text-center font-bold">Criar uma conta</Text>
+        <TouchableOpacity className="mt-6 p-2" onPress={() => router.push('/register')}>
+          <Text className="text-stone-300 text-center">
+            Ainda não tem conta? <Text className="text-amber-500 font-bold">Criar conta</Text>
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

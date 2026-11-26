@@ -59,7 +59,9 @@ function RootLayoutNav() {
         screenOptions={{
           headerStyle: { backgroundColor: colors.header },
           headerTintColor: colors.headerText,
-          contentStyle: { backgroundColor: '#fafaf9' },
+          headerTitleStyle: { fontWeight: '700' },
+          headerShadowVisible: false,
+          contentStyle: { backgroundColor: colors.background },
         }}
       >
         <Stack.Screen name="login" options={{ headerShown: false }} />
@@ -68,7 +70,7 @@ function RootLayoutNav() {
           name="lock"
           options={{ headerShown: false, gestureEnabled: false }}
         />
-        <Stack.Screen name="index" options={{ title: '🔑 Loja de Chaves' }} />
+        <Stack.Screen name="index" options={{ title: 'Loja de Chaves' }} />
         <Stack.Screen name="estoque" options={{ title: 'Estoque' }} />
         <Stack.Screen name="produto" options={{ title: 'Produto' }} />
         <Stack.Screen name="produto-form" options={{ title: 'Produto' }} />

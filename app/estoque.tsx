@@ -15,6 +15,8 @@ import { ProductItem } from '../src/components/ProductItem';
 import { FilterBar } from '../src/components/FilterBar';
 import { EmptyState } from '../src/components/EmptyState';
 import { BarcodeScanner } from '../src/components/BarcodeScanner';
+import { IconButton } from '../src/components/IconButton';
+import { Icon } from '../src/components/Icon';
 import { colors } from '../src/theme';
 import { Product, StockFilter } from '../src/types/product';
 
@@ -77,19 +79,22 @@ export default function Estoque() {
   return (
     <View className="flex-1 p-4">
       <View className="flex-row gap-2 mb-3">
-        <TextInput
-          className="flex-1 bg-white border border-stone-300 rounded-lg p-3"
-          placeholder="Buscar por nome, modelo ou código..."
-          placeholderTextColor="#a8a29e"
-          value={search}
-          onChangeText={setSearch}
-        />
-        <TouchableOpacity
-          className="bg-slate-800 rounded-lg px-4 items-center justify-center"
-          onPress={() => setShowScanner(true)}
-        >
-          <Text className="text-xl">📷</Text>
-        </TouchableOpacity>
+        <View className="flex-1 flex-row items-center bg-white border border-stone-300 rounded-xl px-3 h-12">
+          <Icon name="search" size={18} color={colors.placeholder} />
+          <TextInput
+            className="flex-1 ml-2 text-base text-stone-900"
+            placeholder="Buscar por nome, modelo ou código"
+            placeholderTextColor={colors.placeholder}
+            value={search}
+            onChangeText={setSearch}
+          />
+          {search ? (
+            <TouchableOpacity onPress={() => setSearch('')} accessibilityLabel="Limpar busca" hitSlop={8}>
+              <Icon name="close-circle" size={18} color={colors.placeholder} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+        <IconButton icon="barcode-outline" accessibilityLabel="Escanear código" onPress={() => setShowScanner(true)} />
       </View>
 
       <FilterBar options={stockOptions} value={filter} onChange={setFilter} />
@@ -115,11 +120,11 @@ export default function Estoque() {
           )}
           ListEmptyComponent={
             <EmptyState
-              icon="📦"
+              icon="cube-outline"
               title={allProducts.length === 0 ? 'Nenhum produto ainda' : 'Nada encontrado'}
               subtitle={
                 allProducts.length === 0
-                  ? 'Toque no + para cadastrar o primeiro.'
+                  ? 'Toque em "Novo produto" para cadastrar o primeiro.'
                   : 'Ajuste a busca ou os filtros.'
               }
             />
@@ -129,10 +134,12 @@ export default function Estoque() {
       )}
 
       <TouchableOpacity
-        className="absolute bottom-6 right-6 w-16 h-16 bg-amber-700 rounded-full items-center justify-center shadow-lg"
+        className="absolute bottom-6 right-5 flex-row items-center gap-2 bg-amber-700 rounded-full pl-4 pr-5 h-14 shadow-lg"
         onPress={() => router.push('/produto-form')}
+        accessibilityRole="button"
       >
-        <Text className="text-white text-3xl">+</Text>
+        <Icon name="add" size={24} color={colors.white} />
+        <Text className="text-white font-bold text-base">Novo produto</Text>
       </TouchableOpacity>
     </View>
   );

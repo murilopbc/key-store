@@ -1,21 +1,38 @@
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { useNotifications } from '../src/hooks/useNotifications';
 import { EmptyState } from '../src/components/EmptyState';
+import { IconButton } from '../src/components/IconButton';
+import { Card } from '../src/components/Card';
+import { Icon, IconName } from '../src/components/Icon';
 import { formatDateTime } from '../src/utils/format';
+import { colors } from '../src/theme';
 import { NotificationType } from '../src/types/notification';
 import type { PermissionResult } from '../src/services/notificationService';
 
-const ICONS: Record<NotificationType, string> = {
-  stock: '📦',
-  order: '🛠️',
-  goal: '🎯',
-  info: 'ℹ️',
+const ICONS: Record<NotificationType, { name: IconName; color: string; bg: string }> = {
+  stock: { name: 'cube-outline', color: '#b91c1c', bg: 'bg-red-100' },
+  order: { name: 'construct-outline', color: '#1d4ed8', bg: 'bg-blue-100' },
+  goal: { name: 'trophy-outline', color: '#047857', bg: 'bg-emerald-100' },
+  info: { name: 'information-circle-outline', color: '#57534e', bg: 'bg-stone-100' },
 };
 
 function notificationAlert(result: PermissionResult) {
   if (result === 'granted') return ['Alertas ativados', 'Você receberá avisos de estoque baixo.'] as const;
   if (result === 'denied') return ['Permissão negada', 'Ative nos ajustes do aparelho.'] as const;
   return ['Indisponível neste ambiente', 'O Expo Go não inclui notificações neste SDK. Os alertas continuam aparecendo na lista do app. Para notificações do sistema, use um development build.'] as const;
+}
+
+function ActionButton({ icon, label, onPress, disabled }: { icon: IconName; label: string; onPress: () => void; disabled?: boolean }) {
+  return (
+    <TouchableOpacity
+      className={`flex-1 flex-row items-center justify-center gap-1.5 bg-white border border-stone-300 rounded-xl h-12 ${disabled ? 'opacity-40' : ''}`}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <Icon name={icon} size={18} color={colors.text} />
+      <Text className="text-stone-800 font-semibold">{label}</Text>
+    </TouchableOpacity>
+  );
 }
 
 export default function Notificacoes() {
@@ -36,50 +53,52 @@ export default function Notificacoes() {
 
   return (
     <View className="flex-1 p-4">
-      <View className="flex-row gap-2 mb-3">
-        <TouchableOpacity className="flex-1 bg-white border border-stone-300 rounded-lg p-3" onPress={handleEnable}>
-          <Text className="text-center text-stone-800 font-medium">🔔 Ativar alertas</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="flex-1 bg-white border border-stone-300 rounded-lg p-3"
-          disabled={unreadCount === 0}
+      <View className="flex-row gap-2 mb-4">
+        <ActionButton icon="notifications-outline" label="Ativar alertas" onPress={handleEnable} />
+        <ActionButton
+          icon="checkmark-done-outline"
+          label="Marcar lidas"
           onPress={markAllAsRead}
-        >
-          <Text className={`text-center font-medium ${unreadCount === 0 ? 'text-stone-300' : 'text-stone-800'}`}>
-            ✓ Marcar lidas
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="bg-white border border-red-200 rounded-lg p-3"
-          disabled={notifications.length === 0}
+          disabled={unreadCount === 0}
+        />
+        <IconButton
+          icon="trash-outline"
+          variant="danger"
+          accessibilityLabel="Apagar todas"
           onPress={handleClear}
-        >
-          <Text className="text-red-600">🗑</Text>
-        </TouchableOpacity>
+          disabled={notifications.length === 0}
+        />
       </View>
 
       <FlatList
         data={notifications}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            className={`flex-row rounded-xl p-4 mb-2 ${item.read === 0 ? 'bg-amber-50 border border-amber-200' : 'bg-white'}`}
-            onPress={() => item.read === 0 && markAsRead(item.id)}
-          >
-            <Text className="text-2xl mr-3">{ICONS[item.type]}</Text>
-            <View className="flex-1">
-              <View className="flex-row items-center">
-                <Text className="font-bold text-stone-900 flex-1">{item.title}</Text>
-                {item.read === 0 && <View className="w-2 h-2 rounded-full bg-amber-600" />}
+        renderItem={({ item }) => {
+          const icon = ICONS[item.type] ?? ICONS.info;
+          const unread = item.read === 0;
+          return (
+            <Card
+              className="flex-row p-4 mb-2.5"
+              tone={unread ? 'highlight' : 'default'}
+              onPress={() => unread && markAsRead(item.id)}
+            >
+              <View className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${icon.bg}`}>
+                <Icon name={icon.name} size={20} color={icon.color} />
               </View>
-              <Text className="text-stone-700">{item.message}</Text>
-              <Text className="text-xs text-stone-400 mt-1">{formatDateTime(item.createdAt)}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
+              <View className="flex-1">
+                <View className="flex-row items-center">
+                  <Text className="font-bold text-stone-900 flex-1">{item.title}</Text>
+                  {unread && <View className="w-2.5 h-2.5 rounded-full bg-amber-600" />}
+                </View>
+                <Text className="text-stone-700">{item.message}</Text>
+                <Text className="text-xs text-stone-400 mt-1">{formatDateTime(item.createdAt)}</Text>
+              </View>
+            </Card>
+          );
+        }}
         ListEmptyComponent={
           <EmptyState
-            icon="🔔"
+            icon="notifications-outline"
             title="Nenhum alerta"
             subtitle="Avisaremos quando o estoque de algum item ficar baixo."
           />

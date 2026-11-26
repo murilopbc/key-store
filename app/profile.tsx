@@ -15,6 +15,10 @@ import { useDemoData } from '../src/hooks/useDemoData';
 import { FormField } from '../src/components/FormField';
 import { Button } from '../src/components/Button';
 import { CameraCapture } from '../src/components/CameraCapture';
+import { Card } from '../src/components/Card';
+import { SectionTitle } from '../src/components/SectionTitle';
+import { Icon } from '../src/components/Icon';
+import { colors } from '../src/theme';
 import { useCnpjLookup } from '../src/hooks/useCnpjLookup';
 import { formatCnpj, onlyDigits } from '../src/utils/cnpj';
 import { formatPhone } from '../src/utils/format';
@@ -164,25 +168,33 @@ export default function Profile() {
   }
 
   return (
-    <ScrollView contentContainerClassName="p-6 pb-12" keyboardShouldPersistTaps="handled">
-      <TouchableOpacity className="items-center mb-6" onPress={() => setShowCamera(true)}>
-        {photoUri ? (
-          <Image source={{ uri: photoUri }} className="w-32 h-32 rounded-full" />
-        ) : (
-          <View className="w-32 h-32 rounded-full bg-stone-200 items-center justify-center">
-            <Text className="text-5xl">👤</Text>
+    <ScrollView contentContainerClassName="p-4 pb-12" keyboardShouldPersistTaps="handled">
+      <TouchableOpacity className="items-center mb-6 mt-2" onPress={() => setShowCamera(true)}>
+        <View>
+          {photoUri ? (
+            <Image source={{ uri: photoUri }} className="w-28 h-28 rounded-full" />
+          ) : (
+            <View className="w-28 h-28 rounded-full bg-amber-100 items-center justify-center">
+              <Icon name="person" size={52} color={colors.primary} />
+            </View>
+          )}
+          <View className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-amber-700 border-2 border-white items-center justify-center">
+            <Icon name="camera" size={16} color={colors.white} />
           </View>
-        )}
+        </View>
         <Text className="text-amber-700 font-bold mt-2">
           {photoUri ? 'Trocar foto' : 'Tirar foto'}
         </Text>
       </TouchableOpacity>
 
-      <Text className="text-xs uppercase tracking-wider text-stone-500 mb-2">Dados do vendedor</Text>
-      <FormField label="Nome" value={name} onChangeText={setName} />
-      <FormField label="Email (conta)" value={user?.email ?? ''} editable={false} />
+      <SectionTitle title="Dados do vendedor" />
+      <Card className="p-4 pb-0 mb-6">
+        <FormField label="Nome" value={name} onChangeText={setName} />
+        <FormField label="Email (conta)" value={user?.email ?? ''} editable={false} />
+      </Card>
 
-      <Text className="text-xs uppercase tracking-wider text-stone-500 mt-4 mb-2">Dados da loja</Text>
+      <SectionTitle title="Dados da loja" />
+      <Card className="p-4 mb-4">
       <FormField
         label="CNPJ"
         value={cnpj}
@@ -194,7 +206,8 @@ export default function Profile() {
       />
       <View className="mb-4">
         <Button
-          title="Buscar dados pelo CNPJ (BrasilAPI)"
+          title="Buscar dados pelo CNPJ"
+          icon="search-outline"
           variant="secondary"
           onPress={handleLookupCnpj}
           loading={cnpjLookup.loading}
@@ -211,10 +224,15 @@ export default function Profile() {
         placeholder="(00) 00000-0000"
         maxLength={15}
       />
-      <Button title="Salvar perfil" onPress={handleSave} loading={saving} />
+      <Text className="text-xs text-stone-400 -mt-2">Dados públicos consultados na BrasilAPI.</Text>
+      </Card>
+      <Button title="Salvar perfil" icon="checkmark-circle-outline" onPress={handleSave} loading={saving} />
 
-      <Text className="text-xs uppercase tracking-wider text-stone-500 mt-8 mb-2">Segurança</Text>
-      <View className="bg-white rounded-xl p-4 mb-3 flex-row items-center justify-between">
+      <SectionTitle title="Segurança" className="mt-8 mb-3" />
+      <Card className="p-4 mb-3 flex-row items-center justify-between">
+        <View className="w-10 h-10 rounded-full bg-amber-100 items-center justify-center mr-3">
+          <Icon name="finger-print" size={20} color={colors.primary} />
+        </View>
         <View className="flex-1 pr-4">
           <Text className="font-bold text-stone-900">Desbloqueio por biometria</Text>
           <Text className="text-xs text-stone-500">
@@ -224,16 +242,16 @@ export default function Profile() {
         <Switch
           value={biometricEnabled}
           onValueChange={toggleBiometric}
-          trackColor={{ true: '#b45309' }}
+          trackColor={{ true: colors.primary }}
         />
-      </View>
-      <Button title="Trocar senha (enviar link por email)" variant="secondary" onPress={handleChangePassword} />
+      </Card>
+      <Button title="Trocar senha por email" icon="key-outline" variant="secondary" onPress={handleChangePassword} />
 
-      <Text className="text-xs uppercase tracking-wider text-stone-500 mt-8 mb-2">Aplicativo</Text>
+      <SectionTitle title="Aplicativo" className="mt-8 mb-3" />
       <View className="gap-3">
-        <Button title="Ativar alertas de estoque" variant="secondary" onPress={handleNotifications} />
-        <Button title="Carregar produtos de exemplo" variant="secondary" onPress={handleDemo} />
-        <Button title="Sair da conta" variant="danger" onPress={handleSignOut} />
+        <Button title="Ativar alertas de estoque" icon="notifications-outline" variant="secondary" onPress={handleNotifications} />
+        <Button title="Carregar produtos de exemplo" icon="download-outline" variant="secondary" onPress={handleDemo} />
+        <Button title="Sair da conta" icon="log-out-outline" variant="danger" onPress={handleSignOut} />
       </View>
     </ScrollView>
   );

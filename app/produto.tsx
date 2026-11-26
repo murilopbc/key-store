@@ -4,12 +4,14 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useProduct } from '../src/hooks/useProduct';
 import { Button } from '../src/components/Button';
 import { EmptyState } from '../src/components/EmptyState';
+import { Card } from '../src/components/Card';
+import { Icon } from '../src/components/Icon';
 import { formatCurrency, parseInteger } from '../src/utils/format';
 import { colors } from '../src/theme';
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value, last }: { label: string; value: string; last?: boolean }) {
   return (
-    <View className="flex-row justify-between py-2 border-b border-stone-100">
+    <View className={`flex-row justify-between py-3 ${last ? '' : 'border-b border-stone-100'}`}>
       <Text className="text-stone-500">{label}</Text>
       <Text className="font-medium text-stone-900 flex-1 text-right ml-4">{value}</Text>
     </View>
@@ -30,7 +32,7 @@ export default function ProdutoDetalhe() {
     );
   }
   if (!product) {
-    return <EmptyState icon="❓" title="Produto não encontrado" />;
+    return <EmptyState icon="help-circle-outline" title="Produto não encontrado" />;
   }
 
   const qty = Math.max(parseInteger(qtyText), 0);
@@ -73,58 +75,69 @@ export default function ProdutoDetalhe() {
         {product.photoUri ? (
           <Image source={{ uri: product.photoUri }} className="w-48 h-48 rounded-2xl" />
         ) : (
-          <View className="w-48 h-48 rounded-2xl bg-amber-50 items-center justify-center">
-            <Text className="text-7xl">🔑</Text>
+          <View className="w-48 h-48 rounded-2xl bg-amber-100 items-center justify-center">
+            <Icon name="key-outline" size={80} color={colors.primary} />
           </View>
         )}
         <Text className="text-2xl font-bold text-stone-900 mt-4 text-center">
           {product.name}
         </Text>
+        <Text className="text-xl font-bold text-amber-700 mt-1">
+          {formatCurrency(product.salePrice)}
+        </Text>
       </View>
 
-      <View className="bg-white rounded-xl px-4 mb-4">
+      <Card className="p-4 mb-4" tone={low ? 'danger' : 'default'}>
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-xs font-medium text-stone-500">Em estoque</Text>
+            <Text className={`text-4xl font-bold ${low ? 'text-red-700' : 'text-stone-900'}`}>
+              {product.quantity}
+              <Text className="text-base font-medium text-stone-500"> un.</Text>
+            </Text>
+          </View>
+          <View className={`px-3 py-1.5 rounded-full ${low ? 'bg-red-100' : 'bg-emerald-100'}`}>
+            <Text className={`text-xs font-bold ${low ? 'text-red-700' : 'text-emerald-700'}`}>
+              {product.quantity === 0 ? 'Sem estoque' : low ? 'Repor estoque' : 'Estoque ok'}
+            </Text>
+          </View>
+        </View>
+
+        <Text className="text-sm font-semibold text-stone-700 mt-4 mb-1.5">Ajustar quantidade</Text>
+        <View className="flex-row gap-2">
+          <TextInput
+            className="w-20 bg-white border border-stone-300 rounded-xl px-3 text-center text-lg font-bold text-stone-900"
+            keyboardType="number-pad"
+            value={qtyText}
+            onChangeText={setQtyText}
+            accessibilityLabel="Quantidade a ajustar"
+          />
+          <View className="flex-1">
+            <Button title="Entrada" icon="arrow-down-circle-outline" onPress={() => handleAdjust(1)} />
+          </View>
+          <View className="flex-1">
+            <Button title="Saída" icon="arrow-up-circle-outline" variant="secondary" onPress={() => handleAdjust(-1)} />
+          </View>
+        </View>
+      </Card>
+
+      <Card className="px-4 mb-4">
         <Row label="Categoria" value={product.category || '—'} />
         <Row label="Modelo" value={product.model || '—'} />
         <Row label="Código de barras" value={product.barcode ?? '—'} />
         <Row label="Preço de custo" value={formatCurrency(product.costPrice)} />
-        <Row label="Preço de venda" value={formatCurrency(product.salePrice)} />
         <Row label="Margem" value={`${margin.toFixed(0)}%`} />
-        <Row label="Estoque mínimo" value={`${product.minStock} un.`} />
-      </View>
-
-      <View className={`rounded-xl p-4 mb-4 ${low ? 'bg-red-50 border border-red-200' : 'bg-emerald-50 border border-emerald-200'}`}>
-        <Text className="text-xs uppercase tracking-wider text-stone-500">Em estoque</Text>
-        <Text className="text-4xl font-bold text-stone-900">{product.quantity}</Text>
-        {low && (
-          <Text className="text-red-700 mt-1">
-            {product.quantity === 0 ? 'Produto sem estoque.' : 'Estoque baixo: hora de repor.'}
-          </Text>
-        )}
-
-        <Text className="text-sm text-stone-600 mt-4 mb-1">Ajustar quantidade</Text>
-        <TextInput
-          className="bg-white border border-stone-300 rounded-lg p-3 mb-3"
-          keyboardType="number-pad"
-          value={qtyText}
-          onChangeText={setQtyText}
-        />
-        <View className="flex-row gap-3">
-          <View className="flex-1">
-            <Button title="+ Entrada" onPress={() => handleAdjust(1)} />
-          </View>
-          <View className="flex-1">
-            <Button title="− Saída" variant="secondary" onPress={() => handleAdjust(-1)} />
-          </View>
-        </View>
-      </View>
+        <Row label="Estoque mínimo" value={`${product.minStock} un.`} last />
+      </Card>
 
       <View className="gap-3">
         <Button
           title="Editar produto"
+          icon="create-outline"
           variant="secondary"
           onPress={() => router.push(`/produto-form?id=${product.id}`)}
         />
-        <Button title="Excluir produto" variant="danger" onPress={handleDelete} />
+        <Button title="Excluir produto" icon="trash-outline" variant="danger" onPress={handleDelete} />
       </View>
     </ScrollView>
   );

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useAuthContext } from '../src/contexts/AuthContext';
 import { useSecurityContext } from '../src/contexts/SecurityContext';
 import { Button } from '../src/components/Button';
+import { Icon } from '../src/components/Icon';
 
 /** Tela de bloqueio: a sessão do Firebase existe, mas falta provar que é o dono. */
 export default function Lock() {
@@ -27,8 +28,10 @@ export default function Lock() {
 
   return (
     <View className="flex-1 items-center justify-center bg-slate-800 p-8">
-      <Text className="text-6xl mb-4">🔒</Text>
-      <Text className="text-2xl font-bold text-amber-500 mb-1">App bloqueado</Text>
+      <View className="w-24 h-24 rounded-full bg-white/10 items-center justify-center mb-5">
+        <Icon name="lock-closed" size={44} color="#f59e0b" />
+      </View>
+      <Text className="text-2xl font-bold text-white mb-1">App bloqueado</Text>
       <Text className="text-stone-400 mb-10 text-center">{user?.email}</Text>
 
       {failed && (
@@ -38,7 +41,7 @@ export default function Lock() {
       )}
 
       <View className="w-full gap-3">
-        <Button title="Desbloquear com biometria" onPress={tryUnlock} />
+        <Button title="Desbloquear com biometria" icon="finger-print" onPress={tryUnlock} />
         <TouchableOpacity className="p-3" onPress={usePassword}>
           <Text className="text-stone-300 text-center">Entrar com senha</Text>
         </TouchableOpacity>

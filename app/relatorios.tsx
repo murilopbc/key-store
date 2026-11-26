@@ -4,6 +4,8 @@ import { FilterBar } from '../src/components/FilterBar';
 import { StatCard } from '../src/components/StatCard';
 import { BarChart } from '../src/components/BarChart';
 import { EmptyState } from '../src/components/EmptyState';
+import { Card } from '../src/components/Card';
+import { SectionTitle } from '../src/components/SectionTitle';
 import { formatCurrency } from '../src/utils/format';
 import { Granularity } from '../src/utils/reportBuckets';
 
@@ -26,44 +28,50 @@ export default function Relatorios() {
     <ScrollView contentContainerClassName="p-4 pb-10">
       <FilterBar options={OPTIONS} value={granularity} onChange={setGranularity} />
 
-      <Text className="text-xs uppercase tracking-wider text-stone-500 mb-2">
-        {WINDOW_LABEL[granularity]}
-      </Text>
+      <SectionTitle title="Resumo" right={WINDOW_LABEL[granularity]} className="mb-3" />
       <View className="flex-row gap-3 mb-3">
-        <StatCard label="Faturamento" value={formatCurrency(summary.total)} />
-        <StatCard label="Vendas" value={String(summary.count)} />
+        <StatCard label="Faturamento" value={formatCurrency(summary.total)} icon="trending-up-outline" />
+        <StatCard label="Vendas" value={String(summary.count)} icon="receipt-outline" />
       </View>
       <View className="flex-row gap-3 mb-6">
-        <StatCard label="Custo" value={formatCurrency(summary.cost)} />
+        <StatCard label="Custo" value={formatCurrency(summary.cost)} icon="pricetag-outline" />
         <StatCard
           label="Lucro"
           value={formatCurrency(summary.profit)}
           tone={summary.profit > 0 ? 'good' : 'default'}
+          icon="wallet-outline"
         />
       </View>
 
-      <Text className="text-xs uppercase tracking-wider text-stone-500 mb-2">
-        Faturamento {granularity === 'day' ? 'por dia' : granularity === 'week' ? 'por semana' : 'por mês'}
-      </Text>
+      <SectionTitle
+        title={`Faturamento ${granularity === 'day' ? 'por dia' : granularity === 'week' ? 'por semana' : 'por mês'}`}
+        className="mb-3"
+      />
       <View className="mb-6">
         <BarChart data={buckets} />
       </View>
 
-      <Text className="text-xs uppercase tracking-wider text-stone-500 mb-2">
-        Produtos mais vendidos
-      </Text>
+      <SectionTitle title="Produtos mais vendidos" className="mb-3" />
       {topProducts.length === 0 ? (
-        <EmptyState icon="📊" title="Sem vendas no período" />
+        <EmptyState icon="bar-chart-outline" title="Sem vendas no período" />
       ) : (
         topProducts.map((p, index) => (
-          <View key={p.name} className="flex-row items-center bg-white rounded-xl p-3 mb-2">
-            <Text className="text-xl font-bold text-amber-700 w-8">{index + 1}º</Text>
+          <Card key={p.name} className="flex-row items-center p-3 mb-2.5">
+            <View
+              className={`w-9 h-9 rounded-full items-center justify-center mr-3 ${
+                index === 0 ? 'bg-amber-600' : 'bg-amber-100'
+              }`}
+            >
+              <Text className={`font-bold ${index === 0 ? 'text-white' : 'text-amber-800'}`}>
+                {index + 1}º
+              </Text>
+            </View>
             <View className="flex-1">
               <Text className="font-bold text-stone-900" numberOfLines={1}>{p.name}</Text>
               <Text className="text-xs text-stone-500">{p.quantity} un. vendidas</Text>
             </View>
             <Text className="font-bold text-stone-900">{formatCurrency(p.revenue)}</Text>
-          </View>
+          </Card>
         ))
       )}
     </ScrollView>

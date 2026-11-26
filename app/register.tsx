@@ -13,6 +13,8 @@ import { useAuthContext } from '../src/contexts/AuthContext';
 import { useSecurityContext } from '../src/contexts/SecurityContext';
 import { FormField } from '../src/components/FormField';
 import { Button } from '../src/components/Button';
+import { Icon } from '../src/components/Icon';
+import { colors } from '../src/theme';
 
 export default function Register() {
   const router = useRouter();
@@ -54,14 +56,17 @@ export default function Register() {
         contentContainerClassName="flex-grow justify-center p-6"
         keyboardShouldPersistTaps="handled"
       >
-        <Text className="text-3xl font-bold text-amber-500 text-center mb-1">
+        <View className="self-center w-20 h-20 rounded-3xl bg-amber-700 items-center justify-center mb-4 shadow-lg">
+          <Icon name="person-add" size={36} color={colors.white} />
+        </View>
+        <Text className="text-3xl font-bold text-white text-center mb-1">
           Criar conta
         </Text>
         <Text className="text-stone-400 text-center mb-8">
           Cadastro do vendedor
         </Text>
 
-        <View className="bg-stone-50 rounded-2xl p-5">
+        <View className="bg-white rounded-3xl p-5 shadow-lg">
           <FormField
             label="Email"
             placeholder="vendedor@loja.com"
@@ -85,9 +90,9 @@ export default function Register() {
           <Button title="Cadastrar" onPress={handleRegister} loading={loading} />
         </View>
 
-        <TouchableOpacity className="mt-6" onPress={() => router.back()}>
-          <Text className="text-amber-500 text-center font-bold">
-            Já tenho conta
+        <TouchableOpacity className="mt-6 p-2" onPress={() => router.back()}>
+          <Text className="text-stone-300 text-center">
+            Já tem conta? <Text className="text-amber-500 font-bold">Entrar</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>
