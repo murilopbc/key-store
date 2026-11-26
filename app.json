@@ -38,7 +38,8 @@
           "faceIDPermission": "Use o Face ID para desbloquear o app."
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-font"
     ],
     "scheme": "lojachaves"
   }
